@@ -1,11 +1,10 @@
-import py2neo
 import itertools
 import pandas as pd
 import numpy as np
 import os
 from llama_cpp import Llama
+import csv
 from sklearn.metrics.pairwise import cosine_similarity
-import torch
 
 # llama = Llama(model_path='./llama-2-7b.Q4_K_M.gguf', embedding=True, n_ctx=4096)
 
@@ -38,21 +37,27 @@ def get_abstract_embedding(path, start):
     """
     df = pd.read_csv(path)
     abstract = ''
-    abstracts_embedding = []
     for i in range(start, len(df['label'])):
         abstract += df['text'][i]
         if df['label'][i] == 4 and df['label'][i + 1] == 0:
             abstract_embedding = llama.create_embedding(input=abstract).get('data')[0].get('embedding')
-            abstracts_embedding.append([i, abstract_embedding])
             np.save(f"./temp/abstract_embedding{i}.npy", abstract_embedding)
+            with open('./data/abstract_embedding_test.csv', 'a', newline='', encoding='utf-8') as csvfile:
+                writer = csv.writer(csvfile)
+                writer.writerow([abstract, f'abstract_embedding{i}.npy'])
             abstract = ''
     tmp = []
-    files = os.listdir("./temp")
-    for file in files:
+    files = os.listdir("./temp", )
+    # 获取每个文件的完整路径
+    full_paths = [os.path.join("./temp", file) for file in files]
+    # 按创建时间对文件进行排序
+    sorted_files = sorted(full_paths, key=os.path.getctime)
+    for file in sorted_files:
         if file.endswith('.npy'):
-            tmp.append(np.load(f'./temp/{file}', allow_pickle=True))
+            tmp.append(np.load(f'{file}', allow_pickle=True))
     np.array(tmp)
-    np.save(f'./temp/abstract_embedding_test.npy', tmp)
+    np.save(f'./data/abstract_embedding_test.npy', tmp)
+
 
 def cos_sim(a, b):
     return cosine_similarity([a, b])[0][1]
@@ -66,7 +71,8 @@ def get_paper_rel(array):
     rel = []
     for i, j in itertools.combinations(range(len(array)), 2):
         cos = cos_sim(array[i], array[j])
-        if cos >= 0.88:
+        if cos >= 0.9:
+            print(cos)
             rel.append([i, j])
     return rel
 
@@ -77,12 +83,22 @@ def get_edge_index(sen_rel, abs_rel):
     return torch.tensor(sen_rel + abs_rel)
 
 
-print(len(np.load('./temp/abstract_embedding_test.npy')))
-a = np.load('./temp/abstract_embedding_test.npy')
 
-# test_sen_rel = get_sentence_rel(path='data/test.csv', num=0)
-# get_abstract_embedding(path='data/test.csv', start=0)
-test_paper_rel = get_paper_rel(a)
-print(test_paper_rel)
-print(len(test_paper_rel))
-# test_rel = get_edge_index(test_sen_rel, test_paper_rel)
+
+
+# tmp = []
+# files = os.listdir("./temp", )
+# # 获取每个文件的完整路径
+# full_paths = [os.path.join("./temp", file) for file in files]
+# # 按创建时间对文件进行排序
+# sorted_files = sorted(full_paths, key=os.path.getctime)
+# for file in sorted_files:
+#     if file.endswith('.npy'):
+#         tmp.append(np.load(f'{file}', allow_pickle=True))
+# np.array(tmp)
+# np.save(f'./data/abstract_embedding_test.npy', tmp)
+
+# a = np.load('./data/abstract_embedding_test.npy', allow_pickle=True)
+# print(get_paper_rel(a))
+
+print(pd.read_csv('./data/test.csv')['text'][0])
