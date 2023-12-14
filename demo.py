@@ -45,7 +45,7 @@ def get_abstract_embedding(path, start):
     df = pd.read_csv(path, encoding='utf-8')
     abstract = ''
     for i in range(start, len(df['label'])):
-        abstract += df['text'][i]
+        abstract += df['test'][i]
         if df['label'][i] == 4 and df['label'][i + 1] == 0:
             abstract_embedding = llama.create_embedding(input=abstract).get('data')[0].get('embedding')
             np.save(f"./temp/abstract_embedding{i}.npy", abstract_embedding)
@@ -91,5 +91,4 @@ def get_edge_index(sen_rel, abs_rel):
     return torch.tensor(sen_rel + abs_rel)
 
 
-llama = Llama(model_path='./llama-2-7b.Q4_K_M.gguf', embedding=True, n_ctx=2048, n_gpu_layers=30)
-get_abstract_embedding(path='data/validation.csv', start=0)
+

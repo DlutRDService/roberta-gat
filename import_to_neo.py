@@ -38,7 +38,7 @@ def get_abstract_embedding(path, start):
     df = pd.read_csv(path)
     abstract = ''
     for i in range(start, len(df['label'])):
-        abstract += df['text'][i]
+        abstract += df['test'][i]
         if df['label'][i] == 4 and df['label'][i + 1] == 0:
             abstract_embedding = llama.create_embedding(input=abstract).get('data')[0].get('embedding')
             np.save(f"./temp/abstract_embedding{i}.npy", abstract_embedding)
@@ -101,4 +101,4 @@ def get_edge_index(sen_rel, abs_rel):
 # a = np.load('./data/abstract_embedding_test.npy', allow_pickle=True)
 # print(get_paper_rel(a))
 
-print(pd.read_csv('./data/test.csv')['text'][0])
+print(pd.read_csv('./data/test.csv')['test'][0])
