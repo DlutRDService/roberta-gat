@@ -90,16 +90,6 @@ def get_edge_index(sen_rel, abs_rel):
     """
     return torch.tensor(sen_rel + abs_rel)
 
-data = []
-data.append(
-    {
-        "object": "embedding",
-        "embedding": ["a","b"],
-        "index": 0,
-    }
-)
-print(data)
-
 
 llama = Llama(model_path='./llama-2-7b.Q4_K_M.gguf', embedding=True, n_ctx=2048, n_gpu_layers=30)
 get_abstract_embedding(path='data/validation.csv', start=0)
