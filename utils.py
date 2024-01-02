@@ -18,11 +18,11 @@ def get_sentence_rel(path):
     :return:
     """
     flag = 0
-    df = pd.read_csv(path, encoding="GB2312")
+    df = pd.read_csv(path, encoding="utf-8")
     rel = []
     rels = []
     for i in range(0, len(df['label'])):
-        if df['label'][i] == 5:
+        if df['label'][i] == 4:
             rel = []
             flag = i
             continue
@@ -30,7 +30,7 @@ def get_sentence_rel(path):
         if i+1 == len(df['label']):
             rels.append(rel)
             break
-        if df['label'][i] != 5 and df['label'][i + 1] != 5:
+        if df['label'][i] != 4 and df['label'][i + 1] != 4:
             rel.append([i, i + 1])
             continue
         else:
@@ -90,9 +90,9 @@ def get_abstract_embedding(path, start, name):
     df = pd.read_csv(path, encoding='GB2312')
     abstract = ''
     for i in range(start, len(df['label'])):
-        if df['label'][i] != 5:
+        if df['label'][i] != 4:
             abstract += df['text'][i]
-        if i+1 == len(df['label']) or (df['label'][i] == 4 and df['label'][i + 1] == 5):
+        if i+1 == len(df['label']) or (df['label'][i] == 3 and df['label'][i + 1] == 4):
             abstract_embedding = llama.create_embedding(input=abstract).get('data')[0].get('embedding')
             abstract_embedding = np.array(abstract_embedding)
             np.save(f"../temp/abstract_embedding{i}.npy", abstract_embedding)
@@ -121,7 +121,7 @@ def spilt_node(test_data):
     test_data_split = []
     flag = 0
     for index in range(len(test_data)):
-        if index + 1 == len(test_data) or (test_data[index]['label'] == 4 and test_data[index+1]['label'] == 5):
+        if index + 1 == len(test_data) or (test_data[index]['label'] == 3 and test_data[index+1]['label'] == 4):
             test_data_split.append(test_data[flag:index+1])
             flag = index + 1
     return test_data_split
