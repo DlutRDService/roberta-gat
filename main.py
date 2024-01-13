@@ -1,15 +1,30 @@
 import torch
 from model import RobertaGAT
+from dataset import CustomDataset
+from torch_geometric.loader import DataLoader
+from transformers import RobertaTokenizer
 
 
-def sequence_classification(dataset):
-    preds = 0
+def encode_batch(abstract):
+    tokenizer = RobertaTokenizer.from_pretrained("roberta-base")
+    return tokenizer(abstract, padding='max_length', truncation=True, max_length=96, return_tensors="pt")
+
+
+def abstract_reprocess(abstract):
+    dataset = {split: dataset[split].map(encode_batch, batched=True) for split in dataset.keys()}
+    token_result = token(abstract)
+    train_dataset = CustomDataset(token_result, rel, 20, 8)
+    return DataLoader(train_dataset, batch_size=1, shuffle=True)
+
+
+def sequence_classification(data):
+    abstract_reprocess(data)
     model = RobertaGAT(roberta_model_name="roberta-base", num_classes=4)
     model.load_state_dict(torch.load('./model/model.pth'))
 
     model.eval()
 
-    for batch in dataset:
+    for batch in data:
         input_ids = batch[0]['x']
         attention_mask = batch[0]['mask']
         labels = batch[0]['y']
@@ -32,7 +47,7 @@ def sequence_classification(dataset):
             output, weight1 = model(input_ids, attention_mask, edge_index)
 
             preds = output.argmax(dim=1)
-    print(preds)
+    return preds
 
 
 if __name__ == "__main__":
