@@ -4,6 +4,8 @@ import numpy as np
 import csv
 import os
 from llama_cpp import Llama
+from transformers import RobertaTokenizer
+
 
 # llama = Llama(model_path=r'./llama-2-7b.Q4_K_M.gguf',
 #               embedding=True,
@@ -125,3 +127,10 @@ def spilt_node(test_data):
             test_data_split.append(test_data[flag:index+1])
             flag = index + 1
     return test_data_split
+
+
+def encode_batch(abstract):
+    tokenizer = RobertaTokenizer.from_pretrained("roberta-base")
+    return tokenizer(abstract, padding='max_length', truncation=True, max_length=96, return_tensors="pt")
+
+
