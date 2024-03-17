@@ -59,7 +59,7 @@ def get_edge_index(sen_rel, abs_rel):
     """
     按节点，构建图关系
     """
-    df = pd.read_csv('data/test.csv')
+    df = pd.read_csv('../data/test.csv')
     rels = []
     for i in range(len(df['label'])):
         rel = []

@@ -1,11 +1,9 @@
-import sys
-
 import torch
 from datasets import DatasetDict, load_dataset
 from torch import nn
 from torch_geometric.loader import DataLoader
 
-from dataset import CustomDataset
+from utils.dataset import CustomDataset
 from utils import spilt_node
 
 from model import RobertaGAT
